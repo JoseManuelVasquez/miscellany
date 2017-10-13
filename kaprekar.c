@@ -1,3 +1,12 @@
+/*
+ * by JMVC
+ *
+ * Miscelany program. This program checks the constant kaprekar, given a 4-digit number with at least one digit
+ * different from the others, ordering the number from highest to lowest and vice versa by subtracting the smallest
+ * number from largest and iterating until reaching the constant kaprekar 6174 .
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +24,8 @@ int main (void)
    printf("Number: ");
    scanf("%d",&aux);
 
-   kaprekar(aux);
+   if(!kaprekar(aux))
+      return -1;
 
    return 0;
 }
@@ -56,15 +66,11 @@ char * intToString(const int num)
 
    /* Control of the number */
    if(num-9999>=0 || num<1)
-   {
-      fprintf(stderr, "NUMBER ERROR\n");
       return NULL;
-   }
-
 
    char *aux;
-   /* 4 characters and \0 */
-   aux=(char*)malloc(5*sizeof(char));
+   /* 4 characters and \0 with calloc instead of malloc */
+   aux=(char*)calloc(sizeof(char),5);
    aux[0]=(num/1000) + 48;
    aux[1]=((num/100)-(num/1000)*10) + 48;
    aux[2]=((num/10)-(num/100)*10) + 48;
@@ -77,12 +83,18 @@ char * intToString(const int num)
 int kaprekar(const int kaprekar)
 {
 
-   int aux;
    char *num1, *num2;
 
+   num1=intToString(kaprekar);
+   num2=intToString(kaprekar);
+
    /* Beginning of algorithm */
-   if(!(num1=intToString(kaprekar))) return -1;
-   if(!(num2=intToString(kaprekar))) return -1;
+   if(!num1 || !num2)
+   {
+      fprintf(stderr, "NUMBER ERROR\n");
+      return -1;
+   }
+
    qsort(num1, 4, sizeof(char), cmpReverse);
    qsort(num2, 4, sizeof(char), cmp);
 
@@ -90,15 +102,19 @@ int kaprekar(const int kaprekar)
    if(*num1==*num2)
    {
       fprintf(stderr, "NOT A KAPREKAR NUMBER\n");
+      free(num1);
+      free(num2);
       return -1;
    }
 
 
-   int i=1;
+   int aux=0, i=0, n1, n2;
    while(aux!=6174)
    {
-      aux=atoi(num1)-atoi(num2);
-      printf("Iteration %d: %s - %s = %d\n", i, num1, num2, aux);
+      n1=atoi(num1);
+      n2=atoi(num2);
+      aux=n1-n2;
+      printf("Iteration %d: %d - %d = %d\n", i, n1, n2, aux);
       free(num1);
       free(num2);
       num1=intToString(aux);
@@ -107,5 +123,10 @@ int kaprekar(const int kaprekar)
       qsort(num2, 4, sizeof(char), cmp);
       i++;
    }
+
+   free(num1);
+   free(num2);
+
+   return 0;
 
 }
